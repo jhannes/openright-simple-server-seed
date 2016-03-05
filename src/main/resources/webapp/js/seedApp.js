@@ -60,3 +60,17 @@ var productRepository = {
     return ajax.post('api/products', product, product.id);
   }
 };
+
+var customerRepository = {
+  get: function(id) {
+    return ajax.get('api/customers/' + id);
+  },
+
+  list: function() {
+    return ajax.get('api/customers');
+  },
+
+  save: function(customer) {
+    return ajax.post('api/customers', customer, customer.id);
+  }
+};

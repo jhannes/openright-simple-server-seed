@@ -1,0 +1,10 @@
+<h2>Products</h2>
+
+<script>
+$(function() {
+    if (!window.location.hash || window.location.hash === "#customers" || window.location.hash === "#customers/") {
+        window.location.hash = "customers/list";
+    }
+    displayCurrentLocation();
+});
+</script>

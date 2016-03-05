@@ -1,0 +1,42 @@
+<script type="text/x-handlebars-template" id="customerFormTemplate">
+  <input type="hidden" name="customer[id]" value="{{id}}"/>
+  <div>
+    <label>Customer name:</label>
+    <input type="text" name="customer[name]" required placeholder="Name" value="{{name}}" />
+  </div>
+  <div>
+    <label>Email:</label>
+    <input type="email" name="customer[email]" required placeholder="Email" value="{{email}}" />
+  </div>
+
+  <h3>Submit</h3>
+  <p>
+    <button>Submit customer</button>
+  </p>
+</script>
+
+<form id="customerForm">
+</form>
+
+<script src="/seedapp/vendor/jquery.serialize-object.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  var customerFormTemplate = Handlebars.compile($("#customerFormTemplate").html());
+  
+  if (currentId()) {
+    customerRepository.get(currentId()).then(function (product) {
+      $("#customerForm").html(customerFormTemplate(product));
+    });
+  } else {
+      $("#customerForm").html(customerFormTemplate({}));
+  }
+  
+  $("#customerForm").submit(function(e) {
+    e.preventDefault();
+    var form = $("form#customerForm").serializeObject();
+    customerRepository.save(form.customer).then(function() {
+      window.location.hash = "customers";
+    });
+  });
+});
+</script>

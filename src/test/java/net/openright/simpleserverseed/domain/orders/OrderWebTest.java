@@ -3,6 +3,9 @@ package net.openright.simpleserverseed.domain.orders;
 import net.openright.infrastructure.test.WebTestUtil;
 import net.openright.simpleserverseed.application.SeedAppServer;
 import net.openright.simpleserverseed.application.SimpleseedTestConfig;
+import net.openright.simpleserverseed.domain.customers.Customer;
+import net.openright.simpleserverseed.domain.customers.CustomerRepository;
+import net.openright.simpleserverseed.domain.customers.CustomerRepositoryTest;
 import net.openright.simpleserverseed.domain.products.Product;
 import net.openright.simpleserverseed.domain.products.ProductRepository;
 import net.openright.simpleserverseed.domain.products.ProductRepositoryTest;
@@ -30,6 +33,7 @@ public class OrderWebTest {
     private static WebDriverWait wait;
     private OrdersRepository orderRepository = new OrdersRepository(config);
     private ProductRepository productRepository = new ProductRepository(config);
+    private CustomerRepository customerRepository = new CustomerRepository(config);
 
     @BeforeClass
     public static void startServer() throws Exception {
@@ -53,6 +57,43 @@ public class OrderWebTest {
         browser.manage().timeouts().implicitlyWait(4, TimeUnit.SECONDS);
         browser.get(server.getURI().toString());
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("nav")));
+    }
+
+    @Test
+    public void shouldSeeCurrentCustomer() throws Exception {
+        Customer customer = CustomerRepositoryTest.sampleCustomer();
+        customerRepository.save(customer);
+        browser.get(server.getURI().toString() + "#customers/list");
+
+        List<String> orders = browser.findElement(By.id("customers"))
+                .findElements(By.tagName("li"))
+                .stream().map(WebElement::getText).collect(Collectors.toList());
+
+        assertThat(orders).contains("Customer: " + customer.getName());
+    }
+
+    @Test
+    public void shouldAddCustomer() throws Exception {
+        Customer newCustomer = CustomerRepositoryTest.sampleCustomer();
+
+        browser.findElement(By.linkText("Customers")).click();
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("addCustomer")));
+        browser.findElement(By.id("addCustomer")).click();
+
+        WebElement nameField = browser.findElement(By.name("customer[name]"));
+        nameField.clear();
+        nameField.sendKeys(newCustomer.getName());
+        browser.findElement(By.name("customer[email]"))
+                .sendKeys(String.valueOf(newCustomer.getEmail()));
+        nameField.submit();
+
+        browser.findElement(By.id("customers"));
+
+        Customer customer = customerRepository.list().stream()
+                .filter(c -> c.getName().equals(newCustomer.getName()))
+                .findFirst().get();
+        assertThat(customer)
+                .isEqualToIgnoringGivenFields(newCustomer, "id");
     }
 
     @Test

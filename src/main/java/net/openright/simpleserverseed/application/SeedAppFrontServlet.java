@@ -28,6 +28,7 @@ public class SeedAppFrontServlet extends ApiFrontController {
     @Override
     protected Controller getControllerForPath(String prefix) {
         switch (prefix) {
+            case "customers": return new JsonResourceController(new CustomerApiController(config));
             case "orders": return new JsonResourceController(new OrdersApiController(config));
             case "products": return new JsonResourceController(new ProductsApiController(config));
             default: return null;

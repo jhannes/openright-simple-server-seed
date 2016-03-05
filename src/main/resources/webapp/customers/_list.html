@@ -1,0 +1,33 @@
+<h2>Customer</h2>
+
+<div id="customers">
+  Loading products...
+</div>
+
+<button id="addCustomer">Add new customer</button>
+
+<script type="text/x-handlebars-template" id="customerTemplate">
+  <ul>
+    {{#each .}}
+    <li>Customer: <a href="#" data-product="{{ id }}">{{ name }}</a></li>
+    {{/each}}
+  </ul>
+</script>
+<script type="text/javascript">
+  var customerTemplate = Handlebars.compile($("#customerTemplate").html());
+
+  $(function() {
+    customerRepository.list().then(function(data) {
+      $("#customers").html(customerTemplate(data.customers));
+    });
+
+    $("#customers").on("click", "a", function(e) {
+      e.preventDefault();
+      window.location.hash = "customers/edit/" + $(e.target).data("customer");
+    });
+
+    $("#addCustomer").click(function() {
+      window.location.hash = "customers/edit/new";
+    });
+  });
+</script>
